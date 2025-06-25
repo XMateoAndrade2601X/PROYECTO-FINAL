@@ -63,6 +63,7 @@
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 40px;
     }
     th, td {
       padding: 12px;
@@ -95,10 +96,11 @@
       apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
       authDomain: "silencioseguro-c2c79.firebaseapp.com",
       projectId: "silencioseguro-c2c79",
-      storageBucket: "silencioseguro-c2c79.firebasestorage.app",
+      storageBucket: "silencioseguro-c2c79.appspot.com",
       messagingSenderId: "765440815981",
       appId: "1:765440815981:web:136fa7806d3d0c96762064"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
@@ -111,7 +113,7 @@
     function verPerfil() {
       const user = firebase.auth().currentUser;
       if (user) {
-        alert("Usuario: " + user.displayName + "\\nCorreo: " + user.email);
+        alert("Usuario: " + user.displayName + "\nCorreo: " + user.email);
       } else {
         alert("No hay sesión activa.");
       }
@@ -121,13 +123,17 @@
       if (!user) window.location.href = "login.html";
     });
 
+    function derivar(alertaId) {
+      window.location.href = `derivar.html?id=${alertaId}`;
+    }
+
     function cargarAlertas() {
+      const cuerpo = document.getElementById("cuerpoTabla");
+      cuerpo.innerHTML = "";
       db.collection("alertas").orderBy("fecha", "desc").get().then(snapshot => {
-        const cuerpo = document.getElementById("cuerpoTabla");
-        cuerpo.innerHTML = "";
         snapshot.forEach(doc => {
           const a = doc.data();
-          const fecha = a.fecha?.toDate().toLocaleString() || "Sin fecha";
+          const fecha = a.fecha?.toDate?.().toLocaleString?.() || "Sin fecha";
           const fila = `
             <tr>
               <td>${a.nombre}</td>
@@ -140,10 +146,25 @@
           cuerpo.innerHTML += fila;
         });
       });
-    }
 
-    function derivar(alertaId) {
-      window.location.href = `derivar.html?id=${alertaId}`;
+      // Cargar formularios también
+      const cuerpoForm = document.getElementById("cuerpoFormularios");
+      cuerpoForm.innerHTML = "";
+      db.collection("formularios").orderBy("fecha", "desc").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const f = doc.data();
+          const fecha = f.fecha?.toDate?.().toLocaleString?.() || "Sin fecha";
+          const fila = `
+            <tr>
+              <td>${f.nombre}</td>
+              <td>${f.tipo}</td>
+              <td>${f.descripcion}</td>
+              <td>${f.distrito}, ${f.direccion}</td>
+              <td>${fecha}</td>
+            </tr>`;
+          cuerpoForm.innerHTML += fila;
+        });
+      });
     }
 
     window.onload = cargarAlertas;
@@ -153,9 +174,8 @@
 <body>
   <nav>
     <h1>Panel de Administración</h1>
-    <!-- Botón de historial -->
     <button onclick="window.location.href='historial.html'" style="background-color:#40739e; color:white; padding:10px 20px; border:none; border-radius:6px; font-size:16px; cursor:pointer; margin: 20px 0;">
-        📜 Ver Historial de Derivaciones
+      📜 Ver Historial de Derivaciones
     </button>
     <div class="nav-buttons">
       <button onclick="verPerfil()">Ver Perfil</button>
@@ -181,6 +201,20 @@
         </tr>
       </thead>
       <tbody id="cuerpoTabla"></tbody>
+    </table>
+
+    <h3>Formularios Recibidos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Ubicación</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoFormularios"></tbody>
     </table>
   </main>
 </body>
