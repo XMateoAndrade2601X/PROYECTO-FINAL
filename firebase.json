@@ -12,11 +12,25 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+   "rewrites": [
+  {
+    "source": "/registro.html",
+    "destination": "/registro.html"
+  },
+  {
+    "source": "/informacion.html",
+    "destination": "/informacion.html"
+  },
+  {
+    "source": "/admin.html",
+    "destination": "/admin.html"
+  },
+  {
+    "source": "**",
+    "destination": "/index.html"
+  }
+]
+  
+
   }
 }

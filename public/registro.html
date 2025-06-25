@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - Silence Security</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #0f172a;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      justify-content: center;
+    }
+
+    .form-container {
+      background-color: rgba(255, 255, 255, 0.95);
+      color: #111827;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px 30px;
+      background-color: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0284c7;
+    }
+
+    a {
+      display: block;
+      margin-top: 20px;
+      color: #0ea5e9;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>Crear nueva cuenta</h2>
+    <input type="text" id="nuevoUsuario" placeholder="Usuario"><br>
+    <input type="password" id="nuevaClave" placeholder="Contraseña"><br>
+    <div id="error" class="error"></div>
+    <button onclick="registrar()">Registrar</button>
+    <a href="index.html">Volver al inicio</a>
+  </div>
+
+  <script>
+    function esContraseñaSegura(clave) {
+      // Al menos 8 caracteres, mayúsculas, minúsculas, número y símbolo
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&/#])[A-Za-z\d@$!%*?&/#]{8,}$/;
+      return regex.test(clave);
+    }
+
+    function registrar() {
+      const usuario = document.getElementById("nuevoUsuario").value.trim();
+      const clave = document.getElementById("nuevaClave").value.trim();
+      const errorDiv = document.getElementById("error");
+
+      // Validaciones
+      if (!usuario || !clave) {
+        errorDiv.textContent = "Completa ambos campos.";
+        return;
+      }
+
+      if (usuario.toLowerCase() === "admin" || /\s/.test(usuario)) {
+        errorDiv.textContent = "Nombre de usuario no permitido.";
+        return;
+      }
+
+      if (!esContraseñaSegura(clave)) {
+        errorDiv.textContent = "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, número y símbolo.";
+        return;
+      }
+
+      const contraseñasDebiles = ["12345678", "password", "contraseña", "admin123", "qwerty"];
+      if (contraseñasDebiles.includes(clave.toLowerCase())) {
+        errorDiv.textContent = "Esa contraseña es demasiado común. Usa una más segura.";
+        return;
+      }
+
+      const usuariosGuardados = JSON.parse(localStorage.getItem("usuarios") || "{}");
+
+      if (usuariosGuardados[usuario]) {
+        errorDiv.textContent = "Ese usuario ya está registrado.";
+      } else {
+        usuariosGuardados[usuario] = clave;
+        localStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
+        alert("Registro exitoso. Ahora puedes iniciar sesión.");
+        window.location.href = "index.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
