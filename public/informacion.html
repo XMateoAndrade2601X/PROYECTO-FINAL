@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Información del Proyecto - Silence Security</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #0f172a; /* azul noche */
+      color: white;
+      line-height: 1.8;
+    }
+
+    header {
+      background-color: #1e293b;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    header h1 {
+      font-size: 2.8em;
+      margin: 0;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 0 20px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    h2 {
+      color: #93c5fd;
+      margin-top: 40px;
+      margin-bottom: 15px;
+      font-size: 1.8em;
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: #e5e7eb;
+      font-size: 1.1em;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-bottom: 20px;
+      color: #e5e7eb;
+    }
+
+    ul li {
+      margin-bottom: 8px;
+    }
+
+    footer {
+      background-color: #1e293b;
+      text-align: center;
+      padding: 20px;
+      margin-top: 60px;
+      color: #9ca3af;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2em;
+      }
+
+      .container {
+        margin: 30px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <script>
+  const usuario = localStorage.getItem("usuarioActivo");
+  if (usuario && usuario !== "admin") {
+    const saludo = document.createElement("p");
+    saludo.textContent = `Bienvenido/a, ${usuario}`;
+    saludo.style.textAlign = "center";
+    saludo.style.marginTop = "20px";
+    saludo.style.fontSize = "1.2em";
+    saludo.style.color = "#93c5fd";
+    document.body.prepend(saludo);
+  }
+    </script>
+
+  <header>
+    <h1>Información del Proyecto: Silence Security</h1>
+  </header>
+
+  <div class="container">
+
+    <h2>I. Problema</h2>
+    <p>
+      La violencia de género y el abuso doméstico son problemas estructurales que afectan directamente el acceso, permanencia y bienestar de mujeres, niñas y adolescentes en contextos educativos. Estos problemas se agravan en zonas vulnerables donde no hay acceso a internet, confianza institucional o dispositivos de comunicación tradicionales. 
+    </p>
+    <p>
+      La falta de canales seguros y discretos para solicitar ayuda inhibe la denuncia y perpetúa el silencio, especialmente en hogares de bajos recursos. Según el Ministerio de la Mujer y Poblaciones Vulnerables (MIMP), en 2022 se reportaron más de 140 mil casos de violencia familiar en el Perú, siendo muchas las afectadas estudiantes que abandonaron o vieron comprometida su trayectoria educativa.
+    </p>
+
+    <h2>II. Segmentos de Clientes</h2>
+    <ul>
+      <li><strong>Mujeres y niñas en situación de violencia:</strong> Generalmente entre 10 y 45 años, residentes en zonas rurales, comunidades periurbanas o asentamientos humanos, con bajo acceso a tecnologías digitales y redes de apoyo.</li>
+      <li><strong>Promotoras comunitarias de género y salud:</strong> Mujeres líderes que participan en programas de prevención y atención de violencia, muchas veces voluntarias o con formación básica en primeros auxilios psicológicos.</li>
+      <li><strong>Instituciones educativas:</strong> Escuelas rurales o con alta tasa de vulnerabilidad, que enfrentan limitaciones para actuar ante casos de violencia por falta de recursos, personal capacitado o protocolos adaptados.</li>
+      <li><strong>Gobiernos locales y ONGs:</strong> Interesados en implementar soluciones de bajo costo y alto impacto en materia de protección ciudadana, desarrollo social y derechos humanos.</li>
+    </ul>
+
+    <p><strong>Características comunes:</strong></p>
+    <ul>
+      <li>Baja conectividad a internet.</li>
+      <li>Limitado acceso a tecnología.</li>
+      <li>Necesidad de ayuda inmediata y segura sin exponer su integridad.</li>
+    </ul>
+
+    <h2>III. Propuestas de Valor</h2>
+    <ul>
+      <li>Sistema de alerta silenciosa que no depende de internet ni celular.</li>
+      <li>Botón camuflado (apariencia de enchufe) que se activa fácilmente.</li>
+      <li>Red comunitaria receptora que actúa rápidamente sin intermediarios institucionales.</li>
+      <li>Inteligencia Artificial local opcional para detectar patrones de violencia.</li>
+      <li>Compatible con estructuras comunitarias existentes.</li>
+    </ul>
+
+    <h2>IV. Solución</h2>
+    <p>
+      Silencio Seguro es un sistema de alerta comunitaria que consta de:
+    </p>
+    <ul>
+      <li>Un botón camuflado instalado en el hogar (sin apariencia tecnológica).</li>
+      <li>Un nodo con receptor LoRa o red mesh local.</li>
+      <li>Dispositivos comunitarios que reciben la señal y alertan a vecinas capacitadas.</li>
+      <li>Aplicación web y panel de visualización para mapas de riesgo y monitoreo.</li>
+      <li>Opcionalmente: micrófonos con IA para identificar gritos, golpes o patrones de conflicto.</li>
+    </ul>
+
+  </div>
+
+  <footer>
+    © 2025 Silence Security - Todos los derechos reservados
+  </footer>
+
+</body>
+</html>

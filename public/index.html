@@ -20,7 +20,6 @@
       min-height: 100vh;
     }
 
-    /* Capa oscura transparente sobre la imagen */
     body::before {
       content: '';
       position: absolute;
@@ -162,7 +161,7 @@
         <input type="text" id="usuario" placeholder="Usuario"><br>
         <input type="password" id="clave" placeholder="Contraseña"><br>
         <button onclick="login()">Ingresar</button>
-        <p>¿No tienes cuenta? <a href="#">Regístrate</a></p>
+        <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
       </div>
     </div>
   </div>
@@ -174,16 +173,26 @@
     }
 
     function login() {
-      const usuario = document.getElementById("usuario").value;
-      const clave = document.getElementById("clave").value;
+      const usuario = document.getElementById("usuario").value.trim();
+      const clave = document.getElementById("clave").value.trim();
 
       if (usuario === "admin" && clave === "admin123") {
+        localStorage.setItem("usuarioActivo", "admin");
         window.location.href = "admin.html";
       } else {
-        alert("Acceso como visitante. Redirigiendo a información general...");
-        window.location.href = "informacion.html";
+        const usuarios = JSON.parse(localStorage.getItem("usuarios") || "{}");
+        if (usuarios[usuario] === clave) {
+          localStorage.setItem("usuarioActivo", usuario); // Guardar sesión
+          alert("Bienvenido/a, redirigiendo a la información...");
+          window.location.href = "informacion.html";
+        } else {
+          alert("Credenciales inválidas.");
+        }
       }
     }
   </script>
 </body>
 </html>
+
+
+

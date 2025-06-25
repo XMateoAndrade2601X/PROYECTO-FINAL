@@ -13,10 +13,19 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+  {
+    "source": "/registro.html",
+    "destination": "/registro.html"
+  },
+  {
+    "source": "/informacion.html",
+    "destination": "/informacion.html"
+  },
+  {
+    "source": "**",
+    "destination": "/index.html"
+  }
+]
+
   }
 }
