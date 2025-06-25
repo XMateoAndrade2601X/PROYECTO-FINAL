@@ -1,47 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Derivar Alerta</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f6fa;
       padding: 20px;
-      background: #f9f9f9;
     }
-    h2 {
-      color: #273c75;
+    h1 {
+      color: #2f3640;
     }
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
+      margin-top: 15px;
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
-    .btn {
+    button {
       margin-top: 20px;
-      padding: 12px;
+      padding: 12px 20px;
       background-color: #273c75;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      width: 100%;
     }
-    .btn:hover {
+    button:hover {
       background-color: #40739e;
     }
   </style>
 </head>
 <body>
-  <h2>Derivar Alerta</h2>
+  <h1>Derivar Alerta</h1>
 
   <label>Nombre:</label>
   <input type="text" id="nombre" readonly>
@@ -52,20 +50,20 @@
   <label>Teléfono:</label>
   <input type="text" id="telefono" readonly>
 
-  <label>Tipo de violencia:</label>
+  <label>Tipo de Violencia:</label>
   <input type="text" id="tipo" readonly>
 
-  <label>Agresor:</label>
-  <input type="text" id="agresor" readonly>
-
   <label>Sexo del agresor:</label>
-  <input type="text" id="sexoAgresor" readonly>
+  <input type="text" id="sexo_agresor" readonly>
 
-  <label>Mensaje capturado:</label>
-  <textarea id="mensaje" readonly></textarea>
+  <label>Tipo de agresor:</label>
+  <input type="text" id="agresor" readonly>
 
   <label>Descripción:</label>
   <textarea id="descripcion" readonly></textarea>
+
+  <label>Mensaje capturado:</label>
+  <textarea id="mensaje" readonly></textarea>
 
   <label>Ubicación:</label>
   <input type="text" id="ubicacion" readonly>
@@ -73,90 +71,78 @@
   <label>Fecha:</label>
   <input type="text" id="fecha" readonly>
 
-  <button class="btn" onclick="enviarCorreo()">📧 Enviar por Correo</button>
-  <button class="btn" onclick="enviarWhatsapp()">💬 Enviar por WhatsApp</button>
-  <button class="btn" onclick="llamadaTelefonica()">📞 Llamar</button>
+  <button onclick="enviarCorreo()">📧 Enviar por Correo</button>
+  <button onclick="enviarWhatsapp()">💬 Enviar por WhatsApp</button>
+  <button onclick="llamadaTelefonica()">📞 Llamar</button>
 
   <script>
     const params = new URLSearchParams(location.search);
-    const campos = [
-      "nombre", "sexo", "telefono", "tipo", "agresor", "sexoAgresor",
-      "mensaje", "descripcion", "ubicacion", "fecha"
-    ];
-    campos.forEach(id => {
-      if (params.has(id)) {
-        document.getElementById(id).value = decodeURIComponent(params.get(id));
-      }
-    });
+    document.getElementById('nombre').value = params.get('nombre') || "";
+    document.getElementById('sexo').value = params.get('sexo') || "";
+    document.getElementById('telefono').value = params.get('telefono') || "";
+    document.getElementById('tipo').value = params.get('tipo') || "";
+    document.getElementById('sexo_agresor').value = params.get('sexo_agresor') || "";
+    document.getElementById('agresor').value = params.get('agresor') || "";
+    document.getElementById('descripcion').value = decodeURIComponent(params.get('desc') || "");
+    document.getElementById('mensaje').value = decodeURIComponent(params.get('mensaje') || "");
+    document.getElementById('ubicacion').value = decodeURIComponent(params.get('ubicacion') || "");
+    document.getElementById('fecha').value = params.get('fecha') || new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' });
 
     function getEntidad(tipo, sexo) {
-      const cat = {
+      const catalog = {
         "Violencia Física": {
-          standard: { email: "cem@minmujer.gob.pe", whatsapp: "51941972600", teléfono: "105" }
+          standard: { email: "cem@minmujer.gob.pe", whatsapp: "51941972600", telefono: "105" }
         },
         "Violencia Psicológica": {
-          standard: { email: "cem@minmujer.gob.pe", whatsapp: "51941972600", teléfono: "105" }
+          standard: { email: "cem@minmujer.gob.pe", whatsapp: "51941972600", telefono: "105" }
         },
         "Violencia Sexual": {
-          Mujer: { email: "linea100@mimp.gob.pe", whatsapp: "51984141404", teléfono: "100" },
-          Hombre: { email: "linea100@mimp.gob.pe", whatsapp: "51984141404", teléfono: "100" }
+          Mujer: { email: "linea100@mimp.gob.pe", whatsapp: "51984141404", telefono: "100" },
+          Hombre: { email: "linea100@mimp.gob.pe", whatsapp: "51984141404", telefono: "100" }
         },
         "Violencia Económica": {
-          standard: { email: "defensapublica@minjus.gob.pe", whatsapp: "51980152859", teléfono: "1884" }
+          standard: { email: "defensapublica@minjus.gob.pe", whatsapp: "51980152859", telefono: "1884" }
         }
       };
-      const e = cat[tipo];
-      return e?.[sexo] || e?.standard || { email: "", whatsapp: "", teléfono: "" };
+      const sel = catalog[tipo] || {};
+      return sel[sexo] || sel.standard || { email: "info@mimp.gob.pe", whatsapp: "51941972600", telefono: "105" };
     }
 
     function enviarCorreo() {
-      const sexo = document.getElementById("sexo").value;
-      const tipo = document.getElementById("tipo").value;
-      const entidad = getEntidad(tipo, sexo);
-      const contenido = [
-        `Nombre: ${document.getElementById("nombre").value}`,
-        `Sexo de la víctima: ${sexo}`,
-        `Teléfono: ${document.getElementById("telefono").value}`,
-        `Tipo de violencia: ${tipo}`,
-        `Agresor: ${document.getElementById("agresor").value}`,
-        `Sexo del agresor: ${document.getElementById("sexoAgresor").value}`,
-        `Descripción: ${document.getElementById("descripcion").value}`,
-        `Mensaje capturado: ${document.getElementById("mensaje").value}`,
-        `Ubicación: ${document.getElementById("ubicacion").value}`,
-        `Fecha: ${document.getElementById("fecha").value}`
-      ].join("\n");
-
-      const asunto = encodeURIComponent(`[Alerta] ${tipo} (${sexo})`);
-      const body = encodeURIComponent(contenido);
-      window.location.href = `mailto:${entidad.email}?subject=${asunto}&body=${body}`;
+      const entidad = getEntidad(tipo.value, sexo.value);
+      const asunto = encodeURIComponent(`[Alerta] ${tipo.value} - ${sexo.value}`);
+      const cuerpo = encodeURIComponent(`
+Nombre: ${nombre.value}
+Sexo víctima: ${sexo.value}
+Teléfono: ${telefono.value}
+Tipo de violencia: ${tipo.value}
+Sexo del agresor: ${sexo_agresor.value}
+Tipo de agresor: ${agresor.value}
+Descripción: ${descripcion.value}
+Mensaje capturado: ${mensaje.value}
+Ubicación: ${ubicacion.value}
+Fecha: ${fecha.value}`);
+      window.location.href = `mailto:${entidad.email}?subject=${asunto}&body=${cuerpo}`;
     }
 
     function enviarWhatsapp() {
-      const sexo = document.getElementById("sexo").value;
-      const tipo = document.getElementById("tipo").value;
-      const entidad = getEntidad(tipo, sexo);
-      const msg = [
-        `🔴 ALERTA DE VIOLENCIA 🔴`,
-        `Tipo: ${tipo}`,
-        `Sexo víctima: ${sexo}`,
-        `Nombre: ${document.getElementById("nombre").value}`,
-        `Teléfono: ${document.getElementById("telefono").value}`,
-        `Agresor: ${document.getElementById("agresor").value}`,
-        `Sexo del agresor: ${document.getElementById("sexoAgresor").value}`,
-        `Descripción: ${document.getElementById("descripcion").value}`,
-        `Mensaje: ${document.getElementById("mensaje").value}`,
-        `Ubicación: ${document.getElementById("ubicacion").value}`,
-        `Fecha: ${document.getElementById("fecha").value}`
-      ].join("\n");
-
-      window.open(`https://wa.me/${entidad.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+      const entidad = getEntidad(tipo.value, sexo.value);
+      const mensajeWA = encodeURIComponent(`🚨 Alerta derivada:
+Nombre: ${nombre.value}
+Sexo víctima: ${sexo.value}
+Teléfono: ${telefono.value}
+Tipo: ${tipo.value}
+Agresor: ${agresor.value} (${sexo_agresor.value})
+Descripción: ${descripcion.value}
+Mensaje: ${mensaje.value}
+Ubicación: ${ubicacion.value}
+Fecha: ${fecha.value}`);
+      window.open(`https://wa.me/${entidad.whatsapp}?text=${mensajeWA}`, '_blank');
     }
 
     function llamadaTelefonica() {
-      const sexo = document.getElementById("sexo").value;
-      const tipo = document.getElementById("tipo").value;
-      const entidad = getEntidad(tipo, sexo);
-      window.location.href = `tel:${entidad.teléfono}`;
+      const entidad = getEntidad(tipo.value, sexo.value);
+      window.location.href = `tel:${entidad.telefono}`;
     }
   </script>
 </body>
