@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SILENCE SECURITY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: url('https://colombia.unir.net/wp-content/uploads/sites/4/2024/08/En-que-consiste-la-violencia-familiar3.jpg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* Capa oscura transparente sobre la imagen */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 0;
+    }
+
+    .contenido {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      font-size: 3.5em;
+      color: white;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .alerta-box {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: #111827;
+      border-radius: 15px;
+      padding: 40px 30px;
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .alerta-box p {
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .alerta-box .emoji {
+      font-size: 5em;
+      margin-bottom: 10px;
+    }
+
+    .botones {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .botones button {
+      background-color: #000000;
+      border: 2px solid #f1f5f9;
+      color: white;
+      padding: 15px 30px;
+      font-size: 1em;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .botones button:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      border-color: #0f172a;
+    }
+
+    .login-box {
+      margin-top: 10px;
+    }
+
+    .login-box input {
+      margin: 8px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      width: 80%;
+      max-width: 300px;
+    }
+
+    .login-box button {
+      margin-top: 12px;
+      background-color: #0ea5e9;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .login-box button:hover {
+      background-color: #0284c7;
+    }
+
+    .login-box p {
+      margin-top: 12px;
+      font-size: 0.9em;
+    }
+
+    .login-box a {
+      color: #0ea5e9;
+      text-decoration: none;
+    }
+
+    .login-box a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenido">
+    <header>
+      <h1>SILENCE SECURITY</h1>
+    </header>
+
+    <div class="alerta-box">
+      <div class="emoji">😟</div>
+      <p>ESTÁS EN PELIGRO</p>
+      <div class="botones">
+        <button onclick="location.href='alertas.html'">PEDIR AYUDA</button>
+        <button onclick="mostrarLogin()">MÁS INFORMACIÓN</button>
+      </div>
+
+      <div id="login" class="login-box" style="display:none;">
+        <input type="text" id="usuario" placeholder="Usuario"><br>
+        <input type="password" id="clave" placeholder="Contraseña"><br>
+        <button onclick="login()">Ingresar</button>
+        <p>¿No tienes cuenta? <a href="#">Regístrate</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function mostrarLogin() {
+      const loginBox = document.getElementById("login");
+      loginBox.style.display = loginBox.style.display === "none" ? "block" : "none";
+    }
+
+    function login() {
+      const usuario = document.getElementById("usuario").value;
+      const clave = document.getElementById("clave").value;
+
+      if (usuario === "admin" && clave === "admin123") {
+        window.location.href = "admin.html";
+      } else {
+        alert("Acceso como visitante. Redirigiendo a información general...");
+        window.location.href = "informacion.html";
+      }
+    }
+  </script>
+</body>
+</html>
