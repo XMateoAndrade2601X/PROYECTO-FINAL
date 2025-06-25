@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario de Alerta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f6fa;
+      padding: 20px;
+    }
+    h2 { text-align: center; color: #2f3640; }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    button {
+      background-color: #273c75;
+      color: white;
+      border: none;
+      padding: 12px;
+      margin-top: 20px;
+      width: 100%;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #40739e; }
+    .small-btn {
+      background-color: #dcdde1;
+      color: #2f3640;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    #mensajeFinal {
+      text-align: center;
+      margin-top: 30px;
+      display: none;
+    }
+    .hidden { display: none; }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
+      authDomain: "silencioseguro-c2c79.firebaseapp.com",
+      projectId: "silencioseguro-c2c79",
+      storageBucket: "silencioseguro-c2c79.appspot.com",
+      messagingSenderId: "765440815981",
+      appId: "1:765440815981:web:136fa7806d3d0c96762064"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+<body>
+
+<h2>Formulario de Alerta - <span id="tipoTitulo">Violencia</span></h2>
+
+<form id="formularioAlerta" onsubmit="enviarAlerta(event)">
+  <input type="hidden" id="tipo" value="Violencia Física" />
+
+  <label>Nombre (opcional):</label>
+  <input type="text" id="nombre" placeholder="Ej. Anónimo" />
+
+  <label>Sexo de la víctima:</label>
+  <select id="sexoVictima" required>
+    <option value="">Selecciona</option>
+    <option>Femenino</option>
+    <option>Masculino</option>
+    <option>No binario</option>
+    <option>No especificado</option>
+  </select>
+
+  <label>¿Quién comete la agresión?</label>
+  <select id="agresorTipo" required>
+    <option value="">Selecciona</option>
+    <option>Familiar</option>
+    <option>Conocido</option>
+    <option>Desconocido</option>
+  </select>
+
+  <label>Sexo del agresor:</label>
+  <select id="sexoAgresor" required>
+    <option value="">Selecciona</option>
+    <option>Femenino</option>
+    <option>Masculino</option>
+    <option>No identificado</option>
+  </select>
+
+  <label>Descripción del caso:</label>
+  <textarea id="descripcion" placeholder="Describe lo que ocurrió..." required></textarea>
+  <button type="button" class="small-btn" onclick="iniciarReconocimiento()">🎙️ Dictar</button>
+  <span id="estadoVoz"></span>
+
+  <label>Ubicación:</label>
+  <input type="text" id="ubicacion" placeholder="Obteniendo ubicación..." readonly />
+
+  <button type="submit">📨 Enviar Alerta</button>
+</form>
+
+<div id="mensajeFinal">
+  <h3>Mantén la calma</h3>
+  <p>Recibimos tu alerta. Nuestro equipo responderá pronto.</p>
+  <button onclick="window.location.href='tel:+105'">📞 Llamar 105</button>
+  <button onclick="window.open('https://wa.me/51984141404')">💬 WhatsApp Línea 100</button>
+</div>
+
+<script>
+  let reconocimiento;
+  let descripcionDictada = "";
+
+  function iniciarReconocimiento() {
+    const estado = document.getElementById("estadoVoz");
+    estado.textContent = "🎤 Escuchando...";
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      estado.textContent = "❌ Tu navegador no soporta esta función.";
+      return;
+    }
+
+    reconocimiento = new SpeechRecognition();
+    reconocimiento.lang = 'es-PE';
+    reconocimiento.continuous = false;
+    reconocimiento.interimResults = false;
+
+    reconocimiento.onresult = (event) => {
+      const resultado = event.results[0][0].transcript;
+      descripcionDictada = resultado;
+      estado.textContent = "✅ Dictado capturado";
+    };
+
+    reconocimiento.onerror = (event) => {
+      estado.textContent = "❌ Error: " + event.error;
+    };
+
+    reconocimiento.onend = () => {
+      if (!descripcionDictada) {
+        estado.textContent = "⚠️ No se captó audio";
+      }
+    };
+
+    reconocimiento.start();
+  }
+
+  function enviarAlerta(e) {
+    e.preventDefault();
+
+    const descripcionEscrita = document.getElementById("descripcion").value.trim();
+    const descripcionFinal = descripcionEscrita + (descripcionDictada ? ". Transcripción por voz: " + descripcionDictada : "");
+
+    const alerta = {
+        nombre: document.getElementById("nombre").value || "Anónimo",
+        tipo: document.getElementById("tipo").value,
+        sexo_victima: document.getElementById("sexoVictima").value,
+        agresor_tipo: document.getElementById("agresorTipo").value,
+        sexo_agresor: document.getElementById("sexoAgresor").value,
+        descripcion: descripcionFinal,
+        ubicacion: document.getElementById("ubicacion").value,
+        mensaje: "Recibido desde dictado y formulario",
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+
+    db.collection("alertas").add(alerta)
+      .then(() => {
+        document.getElementById("formularioAlerta").classList.add("hidden");
+        document.getElementById("mensajeFinal").style.display = "block";
+      })
+      .catch((error) => {
+        alert("Error al enviar: " + error.message);
+      });
+  }
+
+  // Obtener ubicación automática
+  window.onload = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude.toFixed(5);
+        const lon = pos.coords.longitude.toFixed(5);
+        document.getElementById("ubicacion").value = `Lat: ${lat}, Lon: ${lon}`;
+      }, err => {
+        document.getElementById("ubicacion").value = "No se pudo obtener ubicación.";
+      });
+    }
+  };
+</script>
+
+</body>
+</html>
+
