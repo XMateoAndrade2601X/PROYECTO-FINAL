@@ -8,22 +8,24 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background-color: #f5f6fa;
+      background-color: #000;
+      color: #fff;
       padding: 20px;
     }
-    h2 { text-align: center; color: #2f3640; }
+    h2 { text-align: center; color: #fff; }
     form {
       max-width: 500px;
       margin: auto;
-      background: #fff;
+      background: #111;
       padding: 25px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
     }
     label { margin-top: 15px; display: block; }
-    input[type=text], textarea {
+    input[type=text], input[type=tel], textarea {
       width: 100%; padding: 10px; margin-top: 5px;
-      border: 1px solid #ccc; border-radius: 5px;
+      border: 1px solid #555; border-radius: 5px;
+      background-color: #222; color: #fff;
     }
     textarea { resize: vertical; min-height: 80px; }
     .opciones-radio label {
@@ -33,21 +35,37 @@
       margin-right: 10px;
     }
     button {
-      background-color: #273c75; color: white; border: none;
+      background-color: #fff; color: #000; border: none;
       padding: 12px; margin-top: 20px; width: 100%;
       border-radius: 5px; font-size: 16px; cursor: pointer;
     }
-    button:hover { background-color: #40739e; }
+    button:hover { background-color: #ddd; }
     .small-btn {
-      background-color: #dcdde1; color: #2f3640; font-size: 14px;
+      background-color: #333; color: #fff; font-size: 14px;
       margin-top: 10px; width: 100%;
     }
     #mensajeFinal, #permisosMsg {
       text-align: center; margin-top: 30px;
     }
     .hidden { display: none; }
+    #estadoVoz {
+      display: block;
+      margin-top: 10px;
+      padding: 10px;
+      background: #222;
+      border: 1px solid #555;
+      border-radius: 6px;
+      color: #0f0;
+    }
+    #permisosMsg {
+      background: #222;
+      border: 1px solid #555;
+      padding: 10px;
+      border-radius: 8px;
+      color: #ff0;
+      font-size: 15px;
+    }
   </style>
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -69,19 +87,19 @@
       e.preventDefault();
 
       const descripcionEscrita = document.getElementById("descripcion").value.trim();
-      const descripcionFinal = descripcionEscrita + (window.descripcionDictada ? ". Transcripción por voz: " + window.descripcionDictada : "");
+      const descripcionDictada = window.descripcionDictada || "";
 
       try {
         await addDoc(collection(db, "alertas"), {
           nombre: document.getElementById("nombre").value || "Anónimo",
-          telefono: document.getElementById("telefono").value || "No proporcionado",
           tipo: document.getElementById("tipo").value,
           sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value || "",
+          telefono: document.getElementById("telefono").value || "No proporcionado",
           agresor_tipo: document.getElementById("agresorTipo").value,
           sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value || "",
-          descripcion: descripcionFinal,
+          descripcion: descripcionEscrita,
+          mensaje: descripcionDictada,
           ubicacion: document.getElementById("ubicacion").value,
-          mensaje: "Recibido desde dictado y formulario",
           fecha: serverTimestamp()
         });
         document.getElementById("formularioAlerta").classList.add("hidden");
@@ -95,7 +113,7 @@
 <body>
 
 <div id="permisosMsg">
-  🔔 Dale permisos de ubicación y micrófono para agilizar tu alerta.
+  🔔 Por favor, otorga permisos de <strong>ubicación</strong> y <strong>micrófono</strong> desde tu navegador (parte superior izquierda o derecha, según tu dispositivo).
 </div>
 
 <h2>Formulario de Alerta - <span id="tipoTitulo">Violencia</span></h2>
@@ -113,8 +131,7 @@
   </div>
 
   <label>Teléfono (opcional):</label>
-    <input type="tel" id="telefono" placeholder="Ej. 987654321" pattern="[0-9]{9}" />
-
+  <input type="tel" id="telefono" placeholder="Ej. 987654321" pattern="[0-9]{9}" />
 
   <label>¿Quién comete la agresión?</label>
   <select id="agresorTipo" required>
@@ -215,5 +232,7 @@
 
 </body>
 </html>
+
+
 
 
