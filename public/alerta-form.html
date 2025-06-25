@@ -23,29 +23,41 @@
     const db = getFirestore(app);
 
     window.enviarAlerta = async function(e) {
-      e.preventDefault();
-      const datos = {
-        nombre: document.getElementById('nombre').value,
-        telefono: document.getElementById('telefono').value,
-        sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value,
-        agresor_tipo: document.getElementById('agresorTipo').value,
-        sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value,
-        descripcion: document.getElementById('descripcion').value,
-        mensaje: mensajeCapturado,
-        ubicacion: document.getElementById('ubicacion').value,
-        tipo: new URLSearchParams(window.location.search).get("tipo"),
-        fecha: new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })
-      };
+        e.preventDefault();
 
-      try {
-        await addDoc(collection(db, "alertas"), datos);
-        document.getElementById('formularioAlerta').style.display = 'none';
-        document.getElementById('mensajeFinal').style.display = 'block';
-      } catch (error) {
-        console.error("Error al guardar en Firestore:", error);
-        alert("Hubo un error al enviar tu alerta. Intenta nuevamente.");
-      }
+        if (!document.getElementById('ubicacion').value.trim()) {
+            alert("Por favor, activa tu ubicación para continuar.");
+            return;
+        }
+
+        const tipoViolencia = new URLSearchParams(window.location.search).get("tipo");
+        if (!tipoViolencia) {
+            alert("No se detectó el tipo de violencia. Por favor, vuelve a seleccionar el tipo.");
+            return;
+        }
+
+        const datos = {
+            nombre: document.getElementById('nombre').value.trim() || "Anónimo",
+            telefono: document.getElementById('telefono').value,
+            sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value || "",
+            agresor_tipo: document.getElementById('agresorTipo').value || "",
+            sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value || "",
+            descripcion: document.getElementById('descripcion').value || "",
+            mensaje: mensajeCapturado || "",
+            ubicacion: document.getElementById('ubicacion').value,
+            tipo: tipoViolencia,
+            fecha: new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })
+        };
+
+        try {
+            await addDoc(collection(db, "alertas"), datos);
+            window.location.href = 'mensaje-final.html';
+        } catch (error) {
+            console.error("Error al guardar en Firestore:", error);
+            alert("Hubo un error al enviar tu alerta. Intenta nuevamente.");
+        }
     }
+
   </script>
   <style>
     body {
@@ -72,13 +84,14 @@
     }
 
     .camuflaje-btn {
-      background-color: #333;
+      background-color: #00BFFF;
       color: white;
       border: none;
-      border-radius: 5px;
-      padding: 10px 16px;
+      border-radius: 8px;
+      padding: 14px 22px;
+      font-size: 1.2em;
+      font-weight: bold;
       cursor: pointer;
-      font-size: 1em;
     }
 
     h1 {
@@ -186,26 +199,6 @@
       border-radius: 12px;
       cursor: pointer;
     }
-
-    #mensajeFinal {
-      display: none;
-      text-align: center;
-      margin-top: 40px;
-      padding: 20px;
-      background: #f0f0f0;
-      border-radius: 12px;
-    }
-
-    #mensajeFinal button {
-      margin: 10px;
-      padding: 12px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 10px;
-      background-color: #000;
-      color: #fff;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -263,14 +256,6 @@
     <button type="submit" class="enviar-btn">📨 Enviar Alerta</button>
   </form>
 
-  <div id="mensajeFinal">
-    <h3>Mantén la calma</h3>
-    <p>Recibimos tu alerta. Nuestro equipo responderá pronto.</p>
-    <button onclick="window.location.href='tel:+105'">📞 Llamar 105</button>
-    <button onclick="window.open('https://wa.me/51984141404')">💬 WhatsApp Línea 100</button>
-    <button onclick="window.location.reload()">↩️ Volver al inicio</button>
-  </div>
-
   <script>
     const reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recog = reconocimiento ? new reconocimiento() : null;
@@ -316,27 +301,10 @@
         document.getElementById('ubicacion').value = `Lat: ${coords.latitude}, Lon: ${coords.longitude}`;
       });
     }
-
-    function enviarAlerta(e) {
-      e.preventDefault();
-      const datos = {
-        nombre: document.getElementById('nombre').value,
-        telefono: document.getElementById('telefono').value,
-        sexoVictima: document.querySelector('input[name="sexoVictima"]:checked')?.value,
-        agresorTipo: document.getElementById('agresorTipo').value,
-        sexoAgresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value,
-        descripcion: document.getElementById('descripcion').value,
-        mensajeCapturado: mensajeCapturado,
-        ubicacion: document.getElementById('ubicacion').value
-      };
-
-      console.log("Datos enviados:", datos);
-      document.getElementById('formularioAlerta').style.display = 'none';
-      document.getElementById('mensajeFinal').style.display = 'block';
-    }
   </script>
 </body>
 </html>
+
 
 
 
