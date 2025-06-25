@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Silencio Seguro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1589927986089-35812386b919?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    h2 { margin-bottom: 20px; color: #192a56; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      background-color: #273c75;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .google-btn {
+      background: white;
+      color: #333;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .link { font-size: 14px; margin-top: 15px; color: #273c75; cursor: pointer; display: block; }
+    .hidden { display: none; }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
+      authDomain: "silencioseguro-c2c79.firebaseapp.com",
+      projectId: "silencioseguro-c2c79",
+      storageBucket: "silencioseguro-c2c79.firebasestorage.app",
+      messagingSenderId: "765440815981",
+      appId: "1:765440815981:web:136fa7806d3d0c96762064"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+
+<body style="margin: 0; background-color: #1e272e; font-family: 'Segoe UI', sans-serif; color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
+
+  <div style="text-align: center; padding: 40px 20px 10px;">
+    <h1 style="font-size: 28px; color: #ffffff;">
+      ¡Bienvenido a <span style="color:#00cec9;">SecuritySilence</span>! :3
+    </h1>
+    <p style="font-size: 16px; color: #dfe6e9;">
+      Tu seguridad es nuestra prioridad 🛡️
+    </p>
+  </div>
+  <div class="login-box" id="loginForm">
+    <h2>Iniciar sesión</h2>
+    <input type="email" id="loginUser" placeholder="Correo electrónico" />
+    <input type="password" id="loginPass" placeholder="Contraseña" />
+    <button onclick="manualLogin()">Entrar</button>
+    <button class="google-btn" onclick="googleLogin()">
+      <img src="https://img.icons8.com/color/48/000000/google-logo.png" width="20"/>
+      Iniciar con Google
+    </button>
+    <span class="link" onclick="toggleForms()">¿No tienes cuenta? Regístrate</span>
+  </div>
+
+  <div class="login-box hidden" id="registerForm">
+    <h2>Registro</h2>
+    <input type="text" id="regName" placeholder="Nombre completo" />
+    <input type="email" id="regEmail" placeholder="Correo electrónico" />
+    <input type="password" id="regPass" placeholder="Contraseña segura" />
+    <button onclick="manualRegister()">Registrarse</button>
+    <span class="link" onclick="toggleForms()">¿Ya tienes cuenta? Inicia sesión</span>
+  </div>
+
+  <script>
+    const admins = [
+      "Mateo Andrade", "Kheyla Condor", "Manuel Saavedra",
+      "23100124@ue.edu.pe", "23100185@ue.edu.pe", "23100213@ue.edu.pe"
+    ];
+
+    function toggleForms() {
+      document.getElementById('loginForm').classList.toggle('hidden');
+      document.getElementById('registerForm').classList.toggle('hidden');
+    }
+
+    function manualRegister() {
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+      const pass = document.getElementById("regPass").value;
+
+      if (!name || !email || !pass) return alert("Completa todos los campos.");
+      if (!/[A-Z]/.test(pass)) return alert("La contraseña debe tener al menos una mayúscula.");
+
+      firebase.auth().createUserWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          user.sendEmailVerification().then(() => {
+            user.updateProfile({ displayName: name });
+            alert("Se ha enviado un correo de verificación. Verifica antes de iniciar sesión.");
+            firebase.auth().signOut();
+            toggleForms();
+          });
+        })
+        .catch((error) => {
+          alert("Error al registrar: " + error.message);
+        });
+    }
+
+    function manualLogin() {
+      const email = document.getElementById("loginUser").value.trim();
+      const pass = document.getElementById("loginPass").value;
+
+      firebase.auth().signInWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          if (user.emailVerified) {
+            redirectUser(user.displayName, user.email);
+          } else {
+            alert("Debes verificar tu correo antes de ingresar.");
+            firebase.auth().signOut();
+          }
+        })
+        .catch((error) => {
+          alert("Error al iniciar sesión: " + error.message);
+        });
+    }
+
+    function googleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          const user = result.user;
+          redirectUser(user.displayName, user.email);
+        })
+        .catch((error) => {
+          alert("Error con Google: " + error.message);
+        });
+    }
+
+    function redirectUser(name, email) {
+      const rol = admins.includes(name) || admins.includes(email) ? "admin" : "usuario";
+      window.location.href = rol === "admin" ? "admin.html" : "index.html";
+    }
+  </script>
+</body>
+</html>
+

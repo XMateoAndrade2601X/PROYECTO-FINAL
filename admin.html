@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Administración | Silencio Seguro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
+      color: #2f3640;
+    }
+    nav {
+      background-color: #273c75;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    nav h1 {
+      font-size: 22px;
+    }
+    .nav-buttons button {
+      margin-left: 15px;
+      background-color: white;
+      color: #273c75;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .nav-buttons button:hover {
+      background-color: #dcdde1;
+    }
+    header {
+      background: url('https://images.unsplash.com/photo-1573164574572-cb89e39749b4?auto=format&fit=crop&w=1500&q=80') no-repeat center center/cover;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.6);
+    }
+    header h2 {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 20px 40px;
+      border-radius: 10px;
+    }
+    main {
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background-color: #273c75;
+      color: white;
+    }
+    td button {
+      padding: 6px 12px;
+      background-color: #44bd32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    td button:hover {
+      background-color: #4cd137;
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
+      authDomain: "silencioseguro-c2c79.firebaseapp.com",
+      projectId: "silencioseguro-c2c79",
+      storageBucket: "silencioseguro-c2c79.firebasestorage.app",
+      messagingSenderId: "765440815981",
+      appId: "1:765440815981:web:136fa7806d3d0c96762064"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function cerrarSesion() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+
+    function verPerfil() {
+      const user = firebase.auth().currentUser;
+      if (user) {
+        alert("Usuario: " + user.displayName + "\\nCorreo: " + user.email);
+      } else {
+        alert("No hay sesión activa.");
+      }
+    }
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) window.location.href = "login.html";
+    });
+
+    function cargarAlertas() {
+      db.collection("alertas").orderBy("fecha", "desc").get().then(snapshot => {
+        const cuerpo = document.getElementById("cuerpoTabla");
+        cuerpo.innerHTML = "";
+        snapshot.forEach(doc => {
+          const a = doc.data();
+          const fecha = a.fecha?.toDate().toLocaleString() || "Sin fecha";
+          const fila = `
+            <tr>
+              <td>${a.nombre}</td>
+              <td>${a.tipo}</td>
+              <td>${a.descripcion}</td>
+              <td>${a.distrito}, ${a.direccion}</td>
+              <td>${fecha}</td>
+              <td><button onclick="derivar('${doc.id}')">Derivar</button></td>
+            </tr>`;
+          cuerpo.innerHTML += fila;
+        });
+      });
+    }
+
+    function derivar(alertaId) {
+      window.location.href = `derivar.html?id=${alertaId}`;
+    }
+
+    window.onload = cargarAlertas;
+  </script>
+</head>
+
+<body>
+  <nav>
+    <h1>Panel de Administración</h1>
+    <!-- Botón de historial -->
+    <button onclick="window.location.href='historial.html'" style="background-color:#40739e; color:white; padding:10px 20px; border:none; border-radius:6px; font-size:16px; cursor:pointer; margin: 20px 0;">
+        📜 Ver Historial de Derivaciones
+    </button>
+    <div class="nav-buttons">
+      <button onclick="verPerfil()">Ver Perfil</button>
+      <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <header>
+    <h2>Gestión de Alertas - Silencio Seguro</h2>
+  </header>
+
+  <main>
+    <h3>Alertas Recibidas</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Ubicación</th>
+          <th>Fecha</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTabla"></tbody>
+    </table>
+  </main>
+</body>
+</html>

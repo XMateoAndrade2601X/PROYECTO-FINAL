@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acceso Denegado</title>
+  <style>
+    body {
+      background-color: #f8d7da;
+      color: #721c24;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .box {
+      background-color: #f1f1f1;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #273c75;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #40739e;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>🚫 Usted no es administrador de esta página</h2>
+    <p>No tiene permisos para acceder al panel de administración.</p>
+    <button onclick="window.location.href='index.html'">Volver al inicio</button>
+  </div>
+</body>
+</html>

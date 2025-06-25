@@ -1,0 +1,140 @@
+<!-- === ALERTA.HTML === -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Soporte Técnico</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
+  <style>
+    body { background-color: #ecf0f1; font-family: 'Segoe UI', sans-serif; padding: 30px; }
+    h2 { text-align: center; margin-bottom: 30px; color: #2f3640; }
+    .buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 40px; }
+    .buttons button {
+      background-color: #f1f2f6;
+      color: #2f3640;
+      border: none;
+      padding: 15px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .buttons button:hover { background-color: #dcdde1; }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background-color: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: none;
+    }
+    label { display: block; margin-top: 15px; }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button[type="submit"], .back-btn {
+      background-color: #44bd32;
+      color: white;
+      margin-top: 20px;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .back-btn {
+      background-color: #273c75;
+      display: block;
+      margin: 20px auto 0;
+      text-align: center;
+    }
+    .back-btn:hover {
+      background-color: #40739e;
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
+      authDomain: "silencioseguro-c2c79.firebaseapp.com",
+      projectId: "silencioseguro-c2c79",
+      storageBucket: "silencioseguro-c2c79.firebasestorage.app",
+      messagingSenderId: "765440815981",
+      appId: "1:765440815981:web:136fa7806d3d0c96762064"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) {
+        alert("Debes iniciar sesión para enviar una alerta.");
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <h2>Soporte Técnico - Selecciona una Opción</h2>
+  <div class="buttons">
+    <button onclick="mostrarFormulario('Violencia Física')">Solución de Pantalla</button>
+    <button onclick="mostrarFormulario('Violencia Psicológica')">Problemas de Red</button>
+    <button onclick="mostrarFormulario('Violencia Sexual')">Soporte de Usuario</button>
+    <button onclick="mostrarFormulario('Violencia Económica')">Asistencia de Aplicación</button>
+  </div>
+
+  <form id="formularioAlerta" onsubmit="enviarAlerta(event)">
+    <input type="hidden" id="tipo" name="tipo" />
+    <label>Nombre (opcional):</label>
+    <input type="text" id="nombre" />
+    <label>Descripción de la situación:</label>
+    <textarea id="descripcion" required></textarea>
+    <label>Distrito:</label>
+    <input type="text" id="distrito" required />
+    <label>Dirección exacta (si aplica):</label>
+    <input type="text" id="direccion" />
+    <button type="submit">Enviar Solicitud</button>
+  </form>
+
+  <button class="back-btn" onclick="window.location.href='index.html'">← Volver a Inicio</button>
+
+  <script>
+    function mostrarFormulario(tipo) {
+      document.getElementById("formularioAlerta").style.display = "block";
+      document.getElementById("tipo").value = tipo;
+    }
+
+    function enviarAlerta(e) {
+      e.preventDefault();
+
+      const alerta = {
+        nombre: document.getElementById("nombre").value || "Usuario Anónimo",
+        tipo: document.getElementById("tipo").value,
+        descripcion: document.getElementById("descripcion").value,
+        distrito: document.getElementById("distrito").value,
+        direccion: document.getElementById("direccion").value,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      db.collection("alertas").add(alerta)
+        .then(() => {
+          alert("Tu alerta ha sido registrada de forma segura.");
+          location.reload();
+        })
+        .catch((error) => {
+          alert("Error al guardar: " + error.message);
+        });
+    }
+  </script>
+</body>
+</html>
