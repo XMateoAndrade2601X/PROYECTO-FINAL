@@ -18,7 +18,7 @@
     }
 
     .form-container {
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(255, 255, 255, 0.95);
       color: #111827;
       padding: 40px;
       border-radius: 12px;
@@ -29,8 +29,7 @@
     }
 
     h2 {
-      margin-bottom: 25px;
-      font-size: 2em;
+      margin-bottom: 20px;
     }
 
     input {
@@ -49,7 +48,7 @@
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: 15px;
       transition: background-color 0.3s ease;
     }
 
@@ -67,6 +66,12 @@
     a:hover {
       text-decoration: underline;
     }
+
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -75,29 +80,49 @@
     <h2>Crear nueva cuenta</h2>
     <input type="text" id="nuevoUsuario" placeholder="Usuario"><br>
     <input type="password" id="nuevaClave" placeholder="Contraseña"><br>
+    <div id="error" class="error"></div>
     <button onclick="registrar()">Registrar</button>
     <a href="index.html">Volver al inicio</a>
   </div>
 
   <script>
+    function esContraseñaSegura(clave) {
+      // Al menos 8 caracteres, mayúsculas, minúsculas, número y símbolo
+      const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&/#])[A-Za-z\d@$!%*?&/#]{8,}$/;
+      return regex.test(clave);
+    }
+
     function registrar() {
       const usuario = document.getElementById("nuevoUsuario").value.trim();
       const clave = document.getElementById("nuevaClave").value.trim();
+      const errorDiv = document.getElementById("error");
 
+      // Validaciones
       if (!usuario || !clave) {
-        alert("Por favor, completa ambos campos.");
+        errorDiv.textContent = "Completa ambos campos.";
         return;
       }
 
-      if (usuario === "admin") {
-        alert("Este usuario está reservado para administradores.");
+      if (usuario.toLowerCase() === "admin" || /\s/.test(usuario)) {
+        errorDiv.textContent = "Nombre de usuario no permitido.";
+        return;
+      }
+
+      if (!esContraseñaSegura(clave)) {
+        errorDiv.textContent = "La contraseña debe tener mínimo 8 caracteres, incluyendo mayúsculas, minúsculas, número y símbolo.";
+        return;
+      }
+
+      const contraseñasDebiles = ["12345678", "password", "contraseña", "admin123", "qwerty"];
+      if (contraseñasDebiles.includes(clave.toLowerCase())) {
+        errorDiv.textContent = "Esa contraseña es demasiado común. Usa una más segura.";
         return;
       }
 
       const usuariosGuardados = JSON.parse(localStorage.getItem("usuarios") || "{}");
 
       if (usuariosGuardados[usuario]) {
-        alert("Ese usuario ya está registrado.");
+        errorDiv.textContent = "Ese usuario ya está registrado.";
       } else {
         usuariosGuardados[usuario] = clave;
         localStorage.setItem("usuarios", JSON.stringify(usuariosGuardados));
