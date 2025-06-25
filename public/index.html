@@ -176,9 +176,9 @@
       const usuario = document.getElementById("usuario").value.trim();
       const clave = document.getElementById("clave").value.trim();
 
-      if (usuario === "admin" && clave === "admin123") {
+      if (usuario === "Admin" && clave === "Admin_123") {
         localStorage.setItem("usuarioActivo", "admin");
-        window.location.href = "admin.html";
+        window.location.href = "adminsito.html";
       } else {
         const usuarios = JSON.parse(localStorage.getItem("usuarios") || "{}");
         if (usuarios[usuario] === clave) {

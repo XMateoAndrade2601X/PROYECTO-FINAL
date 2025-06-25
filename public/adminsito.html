@@ -104,7 +104,17 @@
     const db = firebase.firestore();
 
     function derivar(alertaId) {
-      window.location.href = `derivar.html?id=${alertaId}`;
+      db.collection("alertas").doc(alertaId).get().then(doc => {
+        if (doc.exists) {
+          const alerta = doc.data();
+          const tipo = encodeURIComponent(alerta.tipo);
+          const sexo = encodeURIComponent(alerta.sexo || "Mujer");
+          const desc = encodeURIComponent(alerta.descripcion);
+          window.location.href = `derivar.html?tipo=${tipo}&sexo=${sexo}&desc=${desc}`;
+        } else {
+          alert("No se encontró la alerta.");
+        }
+      });
     }
 
     function cargarAlertas() {
