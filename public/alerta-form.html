@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Formulario de Alerta</title>
   <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
   <style>
@@ -20,65 +20,85 @@
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    label {
-      margin-top: 15px;
-      display: block;
-    }
-    input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    label { margin-top: 15px; display: block; }
+    input[type=text], textarea {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 5px;
     }
     textarea { resize: vertical; min-height: 80px; }
+    .opciones-radio label {
+      display: flex; align-items: center; margin-top: 5px;
+    }
+    .opciones-radio input {
+      margin-right: 10px;
+    }
     button {
-      background-color: #273c75;
-      color: white;
-      border: none;
-      padding: 12px;
-      margin-top: 20px;
-      width: 100%;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
+      background-color: #273c75; color: white; border: none;
+      padding: 12px; margin-top: 20px; width: 100%;
+      border-radius: 5px; font-size: 16px; cursor: pointer;
     }
     button:hover { background-color: #40739e; }
     .small-btn {
-      background-color: #dcdde1;
-      color: #2f3640;
-      font-size: 14px;
-      margin-top: 10px;
+      background-color: #dcdde1; color: #2f3640; font-size: 14px;
+      margin-top: 10px; width: 100%;
     }
-    #mensajeFinal {
-      text-align: center;
-      margin-top: 30px;
-      display: none;
+    #mensajeFinal, #permisosMsg {
+      text-align: center; margin-top: 30px;
     }
     .hidden { display: none; }
   </style>
-
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore-compat.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
       authDomain: "silencioseguro-c2c79.firebaseapp.com",
       projectId: "silencioseguro-c2c79",
       storageBucket: "silencioseguro-c2c79.appspot.com",
       messagingSenderId: "765440815981",
-      appId: "1:765440815981:web:136fa7806d3d0c96762064"
+      appId: "1:765440815981:web:136fa7806d3d0c96762064",
+      measurementId: "G-GLW28V0GCX"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.enviarAlerta = async function(e) {
+      e.preventDefault();
+
+      const descripcionEscrita = document.getElementById("descripcion").value.trim();
+      const descripcionFinal = descripcionEscrita + (window.descripcionDictada ? ". Transcripción por voz: " + window.descripcionDictada : "");
+
+      try {
+        await addDoc(collection(db, "alertas"), {
+          nombre: document.getElementById("nombre").value || "Anónimo",
+          telefono: document.getElementById("telefono").value || "No proporcionado",
+          tipo: document.getElementById("tipo").value,
+          sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value || "",
+          agresor_tipo: document.getElementById("agresorTipo").value,
+          sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value || "",
+          descripcion: descripcionFinal,
+          ubicacion: document.getElementById("ubicacion").value,
+          mensaje: "Recibido desde dictado y formulario",
+          fecha: serverTimestamp()
+        });
+        document.getElementById("formularioAlerta").classList.add("hidden");
+        document.getElementById("mensajeFinal").classList.remove("hidden");
+      } catch (err) {
+        alert("Error al enviar: " + err.message);
+      }
+    }
   </script>
 </head>
 <body>
 
-<h2>Formulario de Alerta - <span id="tipoTitulo">Violencia</span></h2>
+<div id="permisosMsg">
+  🔔 Dale permisos de ubicación y micrófono para agilizar tu alerta.
+</div>
 
+<h2>Formulario de Alerta - <span id="tipoTitulo">Violencia</span></h2>
 <form id="formularioAlerta" onsubmit="enviarAlerta(event)">
   <input type="hidden" id="tipo" value="Violencia Física" />
 
@@ -86,13 +106,15 @@
   <input type="text" id="nombre" placeholder="Ej. Anónimo" />
 
   <label>Sexo de la víctima:</label>
-  <select id="sexoVictima" required>
-    <option value="">Selecciona</option>
-    <option>Femenino</option>
-    <option>Masculino</option>
-    <option>No binario</option>
-    <option>No especificado</option>
-  </select>
+  <div class="opciones-radio">
+    <label><input type="radio" name="sexoVictima" value="Femenino" />Femenino</label>
+    <label><input type="radio" name="sexoVictima" value="Masculino" />Masculino</label>
+    <label><input type="radio" name="sexoVictima" value="No binario" />No binario</label>
+  </div>
+
+  <label>Teléfono (opcional):</label>
+    <input type="tel" id="telefono" placeholder="Ej. 987654321" pattern="[0-9]{9}" />
+
 
   <label>¿Quién comete la agresión?</label>
   <select id="agresorTipo" required>
@@ -103,25 +125,24 @@
   </select>
 
   <label>Sexo del agresor:</label>
-  <select id="sexoAgresor" required>
-    <option value="">Selecciona</option>
-    <option>Femenino</option>
-    <option>Masculino</option>
-    <option>No identificado</option>
-  </select>
+  <div class="opciones-radio">
+    <label><input type="radio" name="sexoAgresor" value="Femenino" />Femenino</label>
+    <label><input type="radio" name="sexoAgresor" value="Masculino" />Masculino</label>
+    <label><input type="radio" name="sexoAgresor" value="No identificado" />No identificado</label>
+  </div>
 
   <label>Descripción del caso:</label>
-  <textarea id="descripcion" placeholder="Describe lo que ocurrió..." required></textarea>
-  <button type="button" class="small-btn" onclick="iniciarReconocimiento()">🎙️ Dictar</button>
+  <textarea id="descripcion" placeholder="Describe lo que ocurrió..."></textarea>
+  <button type="button" class="small-btn" onclick="iniciarReconocimiento()">🎙️ Dictar / Cancelar</button>
   <span id="estadoVoz"></span>
 
   <label>Ubicación:</label>
-  <input type="text" id="ubicacion" placeholder="Obteniendo ubicación..." readonly />
+  <input type="text" id="ubicacion" readonly />
 
   <button type="submit">📨 Enviar Alerta</button>
 </form>
 
-<div id="mensajeFinal">
+<div id="mensajeFinal" class="hidden">
   <h3>Mantén la calma</h3>
   <p>Recibimos tu alerta. Nuestro equipo responderá pronto.</p>
   <button onclick="window.location.href='tel:+105'">📞 Llamar 105</button>
@@ -130,11 +151,18 @@
 
 <script>
   let reconocimiento;
-  let descripcionDictada = "";
+  let escuchando = false;
+  window.descripcionDictada = "";
 
   function iniciarReconocimiento() {
     const estado = document.getElementById("estadoVoz");
-    estado.textContent = "🎤 Escuchando...";
+
+    if (escuchando && reconocimiento) {
+      reconocimiento.stop();
+      escuchando = false;
+      estado.textContent = "🛑 Dictado cancelado";
+      return;
+    }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -147,55 +175,31 @@
     reconocimiento.continuous = false;
     reconocimiento.interimResults = false;
 
+    reconocimiento.onstart = () => {
+      escuchando = true;
+      estado.textContent = "🎤 Escuchando... pulsa de nuevo para cancelar";
+    };
+
     reconocimiento.onresult = (event) => {
-      const resultado = event.results[0][0].transcript;
-      descripcionDictada = resultado;
-      estado.textContent = "✅ Dictado capturado";
+      window.descripcionDictada = event.results[0][0].transcript;
+      estado.textContent = "✅ Capturado: " + window.descripcionDictada;
+      escuchando = false;
     };
 
     reconocimiento.onerror = (event) => {
       estado.textContent = "❌ Error: " + event.error;
+      escuchando = false;
     };
 
     reconocimiento.onend = () => {
-      if (!descripcionDictada) {
-        estado.textContent = "⚠️ No se captó audio";
-      }
+      if (!window.descripcionDictada) estado.textContent = "⚠️ No se captó audio";
+      escuchando = false;
     };
 
     reconocimiento.start();
   }
 
-  function enviarAlerta(e) {
-    e.preventDefault();
-
-    const descripcionEscrita = document.getElementById("descripcion").value.trim();
-    const descripcionFinal = descripcionEscrita + (descripcionDictada ? ". Transcripción por voz: " + descripcionDictada : "");
-
-    const alerta = {
-        nombre: document.getElementById("nombre").value || "Anónimo",
-        tipo: document.getElementById("tipo").value,
-        sexo_victima: document.getElementById("sexoVictima").value,
-        agresor_tipo: document.getElementById("agresorTipo").value,
-        sexo_agresor: document.getElementById("sexoAgresor").value,
-        descripcion: descripcionFinal,
-        ubicacion: document.getElementById("ubicacion").value,
-        mensaje: "Recibido desde dictado y formulario",
-        fecha: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-
-    db.collection("alertas").add(alerta)
-      .then(() => {
-        document.getElementById("formularioAlerta").classList.add("hidden");
-        document.getElementById("mensajeFinal").style.display = "block";
-      })
-      .catch((error) => {
-        alert("Error al enviar: " + error.message);
-      });
-  }
-
-  // Obtener ubicación automática
+  // Geolocalización automática
   window.onload = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
@@ -211,4 +215,5 @@
 
 </body>
 </html>
+
 
