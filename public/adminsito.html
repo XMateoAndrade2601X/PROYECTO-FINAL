@@ -87,7 +87,6 @@
     }
   </style>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore-compat.js"></script>
   <script>
@@ -104,18 +103,28 @@
     const db = firebase.firestore();
 
     function derivar(alertaId) {
-      db.collection("alertas").doc(alertaId).get().then(doc => {
-        if (doc.exists) {
-          const alerta = doc.data();
-          const tipo = encodeURIComponent(alerta.tipo);
-          const sexo = encodeURIComponent(alerta.sexo || "Mujer");
-          const desc = encodeURIComponent(alerta.descripcion);
-          window.location.href = `derivar.html?tipo=${tipo}&sexo=${sexo}&desc=${desc}`;
-        } else {
-          alert("No se encontró la alerta.");
-        }
-      });
+  db.collection("alertas").doc(alertaId).get().then(doc => {
+    if (doc.exists) {
+      const a = doc.data();
+      const url = new URL("derivar.html", window.location.origin);
+      url.searchParams.set("nombre", a.nombre || "Anónimo");  
+      url.searchParams.set("tipo", a.tipo || "");
+      url.searchParams.set("sexo", a.sexo_victima || "");
+      url.searchParams.set("desc", a.descripcion || "");
+      url.searchParams.set("telefono", a.telefono || "");
+      url.searchParams.set("agresor", a.agresor_tipo || "");
+      url.searchParams.set("sexo_agresor", a.sexo_agresor || "");
+      url.searchParams.set("mensaje", a.mensaje || "");
+      url.searchParams.set("ubicacion", a.ubicacion || "");
+      url.searchParams.set("fecha", a.fecha?.toDate?.().toISOString() || "");
+
+      window.location.href = url.href;
+    } else {
+      alert("No se encontró la alerta.");
     }
+  });
+}
+
 
     function cargarAlertas() {
       const cuerpo = document.getElementById("cuerpoTabla");
@@ -123,35 +132,21 @@
       db.collection("alertas").orderBy("fecha", "desc").get().then(snapshot => {
         snapshot.forEach(doc => {
           const a = doc.data();
-          const fecha = a.fecha?.toDate?.().toLocaleString?.() || "Sin fecha";
           const fila = `
             <tr>
-              <td>${a.nombre}</td>
+              <td>${a.nombre || "Anónimo"}</td>
+              <td>${a.telefono || "-"}</td>
+              <td>${a.sexo_victima || "-"}</td>
+              <td>${a.agresor_tipo || "-"}</td>
+              <td>${a.sexo_agresor || "-"}</td>
               <td>${a.tipo}</td>
               <td>${a.descripcion}</td>
-              <td>${a.distrito}, ${a.direccion}</td>
-              <td>${fecha}</td>
+              <td>${a.mensaje || "-"}</td>
+              <td>${a.ubicacion || "-"}</td>
+              <td>${a.fecha || "Sin fecha"}</td>
               <td><button onclick="derivar('${doc.id}')">Derivar</button></td>
             </tr>`;
           cuerpo.innerHTML += fila;
-        });
-      });
-
-      const cuerpoForm = document.getElementById("cuerpoFormularios");
-      cuerpoForm.innerHTML = "";
-      db.collection("formularios").orderBy("fecha", "desc").get().then(snapshot => {
-        snapshot.forEach(doc => {
-          const f = doc.data();
-          const fecha = f.fecha?.toDate?.().toLocaleString?.() || "Sin fecha";
-          const fila = `
-            <tr>
-              <td>${f.nombre}</td>
-              <td>${f.tipo}</td>
-              <td>${f.descripcion}</td>
-              <td>${f.distrito}, ${f.direccion}</td>
-              <td>${fecha}</td>
-            </tr>`;
-          cuerpoForm.innerHTML += fila;
         });
       });
     }
@@ -159,7 +154,6 @@
     window.onload = cargarAlertas;
   </script>
 </head>
-
 <body>
   <nav>
     <h1>Panel de Administración</h1>
@@ -178,8 +172,13 @@
       <thead>
         <tr>
           <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Sexo Víctima</th>
+          <th>Tipo de Agresor</th>
+          <th>Sexo Agresor</th>
           <th>Tipo</th>
           <th>Descripción</th>
+          <th>Mensaje</th>
           <th>Ubicación</th>
           <th>Fecha</th>
           <th>Acción</th>
@@ -187,20 +186,7 @@
       </thead>
       <tbody id="cuerpoTabla"></tbody>
     </table>
-
-    <h3>Formularios Recibidos</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Tipo</th>
-          <th>Descripción</th>
-          <th>Ubicación</th>
-          <th>Fecha</th>
-        </tr>
-      </thead>
-      <tbody id="cuerpoFormularios"></tbody>
-    </table>
   </main>
 </body>
 </html>
+
