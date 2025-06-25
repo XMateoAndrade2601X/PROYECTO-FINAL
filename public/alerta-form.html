@@ -2,79 +2,18 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulario de Alerta</title>
-  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet"/>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #000;
-      color: #fff;
-      padding: 20px;
-    }
-    h2 { text-align: center; color: #fff; }
-    form {
-      max-width: 500px;
-      margin: auto;
-      background: #111;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-    }
-    label { margin-top: 15px; display: block; }
-    input[type=text], input[type=tel], textarea {
-      width: 100%; padding: 10px; margin-top: 5px;
-      border: 1px solid #555; border-radius: 5px;
-      background-color: #222; color: #fff;
-    }
-    textarea { resize: vertical; min-height: 80px; }
-    .opciones-radio label {
-      display: flex; align-items: center; margin-top: 5px;
-    }
-    .opciones-radio input {
-      margin-right: 10px;
-    }
-    button {
-      background-color: #fff; color: #000; border: none;
-      padding: 12px; margin-top: 20px; width: 100%;
-      border-radius: 5px; font-size: 16px; cursor: pointer;
-    }
-    button:hover { background-color: #ddd; }
-    .small-btn {
-      background-color: #333; color: #fff; font-size: 14px;
-      margin-top: 10px; width: 100%;
-    }
-    #mensajeFinal, #permisosMsg {
-      text-align: center; margin-top: 30px;
-    }
-    .hidden { display: none; }
-    #estadoVoz {
-      display: block;
-      margin-top: 10px;
-      padding: 10px;
-      background: #222;
-      border: 1px solid #555;
-      border-radius: 6px;
-      color: #0f0;
-    }
-    #permisosMsg {
-      background: #222;
-      border: 1px solid #555;
-      padding: 10px;
-      border-radius: 8px;
-      color: #ff0;
-      font-size: 15px;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAh90IRuc-aJYS35YnhGMHKBWXeahDzjt8",
       authDomain: "silencioseguro-c2c79.firebaseapp.com",
       projectId: "silencioseguro-c2c79",
-      storageBucket: "silencioseguro-c2c79.appspot.com",
+      storageBucket: "silencioseguro-c2c79.firebasestorage.app",
       messagingSenderId: "765440815981",
       appId: "1:765440815981:web:136fa7806d3d0c96762064",
       measurementId: "G-GLW28V0GCX"
@@ -85,151 +24,317 @@
 
     window.enviarAlerta = async function(e) {
       e.preventDefault();
-
-      const descripcionEscrita = document.getElementById("descripcion").value.trim();
-      const descripcionDictada = window.descripcionDictada || "";
+      const datos = {
+        nombre: document.getElementById('nombre').value,
+        telefono: document.getElementById('telefono').value,
+        sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value,
+        agresor_tipo: document.getElementById('agresorTipo').value,
+        sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value,
+        descripcion: document.getElementById('descripcion').value,
+        mensaje: mensajeCapturado,
+        ubicacion: document.getElementById('ubicacion').value,
+        tipo: new URLSearchParams(window.location.search).get("tipo"),
+        fecha: new Date().toLocaleString('es-PE', { timeZone: 'America/Lima' })
+      };
 
       try {
-        await addDoc(collection(db, "alertas"), {
-          nombre: document.getElementById("nombre").value || "Anónimo",
-          tipo: document.getElementById("tipo").value,
-          sexo_victima: document.querySelector('input[name="sexoVictima"]:checked')?.value || "",
-          telefono: document.getElementById("telefono").value || "No proporcionado",
-          agresor_tipo: document.getElementById("agresorTipo").value,
-          sexo_agresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value || "",
-          descripcion: descripcionEscrita,
-          mensaje: descripcionDictada,
-          ubicacion: document.getElementById("ubicacion").value,
-          fecha: serverTimestamp()
-        });
-        document.getElementById("formularioAlerta").classList.add("hidden");
-        document.getElementById("mensajeFinal").classList.remove("hidden");
-      } catch (err) {
-        alert("Error al enviar: " + err.message);
+        await addDoc(collection(db, "alertas"), datos);
+        document.getElementById('formularioAlerta').style.display = 'none';
+        document.getElementById('mensajeFinal').style.display = 'block';
+      } catch (error) {
+        console.error("Error al guardar en Firestore:", error);
+        alert("Hubo un error al enviar tu alerta. Intenta nuevamente.");
       }
     }
   </script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #fff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #111;
+      color: #fff;
+      padding: 10px 20px;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .camuflaje-btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    h1 {
+      font-size: 1.6em;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    form {
+      width: 100%;
+      max-width: 500px;
+      background: #f0f0f0;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    label {
+      font-size: 1.1em;
+      margin-top: 20px;
+      display: block;
+    }
+
+    input[type=text], input[type=tel], textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 15px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 12px;
+      background-color: #fff;
+      color: #000;
+      font-size: 1.1em;
+    }
+
+    textarea { min-height: 100px; resize: vertical; }
+
+    .opciones-radio {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .opciones-radio label {
+      background-color: #ddd;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 1.1em;
+      display: flex;
+      align-items: center;
+    }
+
+    .opciones-radio input {
+      margin-right: 10px;
+      transform: scale(1.4);
+    }
+
+    .audio-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .audio-controls button {
+      flex: 1;
+      padding: 12px;
+      font-size: 1em;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .audio-controls button:hover {
+      background-color: #666;
+    }
+
+    #estadoVoz {
+      margin-top: 10px;
+      padding: 12px;
+      background-color: #eee;
+      border-radius: 10px;
+      font-size: 1em;
+      color: #008000;
+    }
+
+    #grabandoIndicador {
+      margin-top: 10px;
+      font-weight: bold;
+      color: red;
+      display: none;
+    }
+
+    button.enviar-btn {
+      width: 100%;
+      padding: 16px;
+      margin-top: 25px;
+      font-size: 1.2em;
+      background-color: #111;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    #mensajeFinal {
+      display: none;
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 12px;
+    }
+
+    #mensajeFinal button {
+      margin: 10px;
+      padding: 12px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 10px;
+      background-color: #000;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    FORMULARIO - VIOLENCIA
+    <button class="camuflaje-btn" onclick="window.location.href='https://www.google.com'">🕵️ Camuflaje</button>
+  </header>
 
-<div id="permisosMsg">
-  🔔 Por favor, otorga permisos de <strong>ubicación</strong> y <strong>micrófono</strong> desde tu navegador (parte superior izquierda o derecha, según tu dispositivo).
-</div>
+  <h1>Reportar Alerta</h1>
+  <form id="formularioAlerta" onsubmit="enviarAlerta(event)">
+    <label>Nombre (opcional):</label>
+    <input type="text" id="nombre" placeholder="Ej. Anónimo" />
 
-<h2>Formulario de Alerta - <span id="tipoTitulo">Violencia</span></h2>
-<form id="formularioAlerta" onsubmit="enviarAlerta(event)">
-  <input type="hidden" id="tipo" value="Violencia Física" />
+    <label>Sexo de la víctima:</label>
+    <div class="opciones-radio">
+      <label><input type="radio" name="sexoVictima" value="Femenino" />Femenino</label>
+      <label><input type="radio" name="sexoVictima" value="Masculino" />Masculino</label>
+      <label><input type="radio" name="sexoVictima" value="Prefiero no decirlo" />Prefiero no decirlo</label>
+    </div>
 
-  <label>Nombre (opcional):</label>
-  <input type="text" id="nombre" placeholder="Ej. Anónimo" />
+    <label>Teléfono (opcional):</label>
+    <input type="tel" id="telefono" placeholder="Ej. 987654321" pattern="[0-9]{9}" />
 
-  <label>Sexo de la víctima:</label>
-  <div class="opciones-radio">
-    <label><input type="radio" name="sexoVictima" value="Femenino" />Femenino</label>
-    <label><input type="radio" name="sexoVictima" value="Masculino" />Masculino</label>
-    <label><input type="radio" name="sexoVictima" value="No binario" />No binario</label>
+    <label>¿Quién comete la agresión?</label>
+    <select id="agresorTipo" required>
+      <option value="">Selecciona</option>
+      <option>Familiar</option>
+      <option>Conocido</option>
+      <option>Desconocido</option>
+    </select>
+
+    <label>Sexo del agresor:</label>
+    <div class="opciones-radio">
+      <label><input type="radio" name="sexoAgresor" value="Femenino" />Femenino</label>
+      <label><input type="radio" name="sexoAgresor" value="Masculino" />Masculino</label>
+      <label><input type="radio" name="sexoAgresor" value="No identificado" />No identificado</label>
+    </div>
+
+    <label>Descripción del caso:</label>
+    <textarea id="descripcion" placeholder="Describe lo que ocurrió..."></textarea>
+
+    <label>Mensaje capturado:</label>
+    <div id="estadoVoz"></div>
+    <div id="grabandoIndicador">🎙️ Grabando...</div>
+
+    <div class="audio-controls">
+      <button type="button" onclick="iniciarReconocimiento()">🎤 Capturar</button>
+      <button type="button" onclick="detenerReconocimiento()">⏸️ Pausar</button>
+      <button type="button" onclick="limpiarReconocimiento()">🗑️ Borrar</button>
+    </div>
+
+    <label>Ubicación:</label>
+    <input type="text" id="ubicacion" readonly />
+
+    <button type="submit" class="enviar-btn">📨 Enviar Alerta</button>
+  </form>
+
+  <div id="mensajeFinal">
+    <h3>Mantén la calma</h3>
+    <p>Recibimos tu alerta. Nuestro equipo responderá pronto.</p>
+    <button onclick="window.location.href='tel:+105'">📞 Llamar 105</button>
+    <button onclick="window.open('https://wa.me/51984141404')">💬 WhatsApp Línea 100</button>
+    <button onclick="window.location.reload()">↩️ Volver al inicio</button>
   </div>
 
-  <label>Teléfono (opcional):</label>
-  <input type="tel" id="telefono" placeholder="Ej. 987654321" pattern="[0-9]{9}" />
+  <script>
+    const reconocimiento = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = reconocimiento ? new reconocimiento() : null;
+    let mensajeCapturado = '';
 
-  <label>¿Quién comete la agresión?</label>
-  <select id="agresorTipo" required>
-    <option value="">Selecciona</option>
-    <option>Familiar</option>
-    <option>Conocido</option>
-    <option>Desconocido</option>
-  </select>
+    if (recog) {
+      recog.continuous = true;
+      recog.lang = 'es-PE';
 
-  <label>Sexo del agresor:</label>
-  <div class="opciones-radio">
-    <label><input type="radio" name="sexoAgresor" value="Femenino" />Femenino</label>
-    <label><input type="radio" name="sexoAgresor" value="Masculino" />Masculino</label>
-    <label><input type="radio" name="sexoAgresor" value="No identificado" />No identificado</label>
-  </div>
+      recog.onstart = () => {
+        document.getElementById('grabandoIndicador').style.display = 'block';
+      };
 
-  <label>Descripción del caso:</label>
-  <textarea id="descripcion" placeholder="Describe lo que ocurrió..."></textarea>
-  <button type="button" class="small-btn" onclick="iniciarReconocimiento()">🎙️ Dictar / Cancelar</button>
-  <span id="estadoVoz"></span>
+      recog.onend = () => {
+        document.getElementById('grabandoIndicador').style.display = 'none';
+      };
 
-  <label>Ubicación:</label>
-  <input type="text" id="ubicacion" readonly />
-
-  <button type="submit">📨 Enviar Alerta</button>
-</form>
-
-<div id="mensajeFinal" class="hidden">
-  <h3>Mantén la calma</h3>
-  <p>Recibimos tu alerta. Nuestro equipo responderá pronto.</p>
-  <button onclick="window.location.href='tel:+105'">📞 Llamar 105</button>
-  <button onclick="window.open('https://wa.me/51984141404')">💬 WhatsApp Línea 100</button>
-</div>
-
-<script>
-  let reconocimiento;
-  let escuchando = false;
-  window.descripcionDictada = "";
-
-  function iniciarReconocimiento() {
-    const estado = document.getElementById("estadoVoz");
-
-    if (escuchando && reconocimiento) {
-      reconocimiento.stop();
-      escuchando = false;
-      estado.textContent = "🛑 Dictado cancelado";
-      return;
+      recog.onresult = function(event) {
+        mensajeCapturado = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+        document.getElementById('estadoVoz').innerText = mensajeCapturado;
+      };
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      estado.textContent = "❌ Tu navegador no soporta esta función.";
-      return;
+    function iniciarReconocimiento() {
+      if (recog) recog.start();
     }
 
-    reconocimiento = new SpeechRecognition();
-    reconocimiento.lang = 'es-PE';
-    reconocimiento.continuous = false;
-    reconocimiento.interimResults = false;
+    function detenerReconocimiento() {
+      if (recog) recog.stop();
+    }
 
-    reconocimiento.onstart = () => {
-      escuchando = true;
-      estado.textContent = "🎤 Escuchando... pulsa de nuevo para cancelar";
-    };
+    function limpiarReconocimiento() {
+      if (recog) recog.stop();
+      mensajeCapturado = '';
+      document.getElementById('estadoVoz').innerText = '';
+    }
 
-    reconocimiento.onresult = (event) => {
-      window.descripcionDictada = event.results[0][0].transcript;
-      estado.textContent = "✅ Capturado: " + window.descripcionDictada;
-      escuchando = false;
-    };
-
-    reconocimiento.onerror = (event) => {
-      estado.textContent = "❌ Error: " + event.error;
-      escuchando = false;
-    };
-
-    reconocimiento.onend = () => {
-      if (!window.descripcionDictada) estado.textContent = "⚠️ No se captó audio";
-      escuchando = false;
-    };
-
-    reconocimiento.start();
-  }
-
-  // Geolocalización automática
-  window.onload = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude.toFixed(5);
-        const lon = pos.coords.longitude.toFixed(5);
-        document.getElementById("ubicacion").value = `Lat: ${lat}, Lon: ${lon}`;
-      }, err => {
-        document.getElementById("ubicacion").value = "No se pudo obtener ubicación.";
+        const coords = pos.coords;
+        document.getElementById('ubicacion').value = `Lat: ${coords.latitude}, Lon: ${coords.longitude}`;
       });
     }
-  };
-</script>
 
+    function enviarAlerta(e) {
+      e.preventDefault();
+      const datos = {
+        nombre: document.getElementById('nombre').value,
+        telefono: document.getElementById('telefono').value,
+        sexoVictima: document.querySelector('input[name="sexoVictima"]:checked')?.value,
+        agresorTipo: document.getElementById('agresorTipo').value,
+        sexoAgresor: document.querySelector('input[name="sexoAgresor"]:checked')?.value,
+        descripcion: document.getElementById('descripcion').value,
+        mensajeCapturado: mensajeCapturado,
+        ubicacion: document.getElementById('ubicacion').value
+      };
+
+      console.log("Datos enviados:", datos);
+      document.getElementById('formularioAlerta').style.display = 'none';
+      document.getElementById('mensajeFinal').style.display = 'block';
+    }
+  </script>
 </body>
 </html>
 
